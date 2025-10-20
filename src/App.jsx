@@ -28,20 +28,20 @@ function App() {
       <section className="skills">
         <h2>Skills</h2>
         <div className="skills-grid">
-          <div className="skill-item" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <img src="/icons8-java-64.png" alt="JavaScript Logo" className="skill-logo" style={{width: '22px', height: '22px', marginRight: '2px', verticalAlign: 'middle', display: 'inline-block'}} />
+          <div className="skill-item">
+            <img src="/icons8-java-64.png" alt="JavaScript Logo" className="skill-logo" />
             <span>JavaScript</span>
           </div>
-          <div className="skill-item" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <img src="/icons8-react-40.png" alt="React Logo" className="skill-logo" style={{width: '22px', height: '22px', marginRight: '2px', verticalAlign: 'middle', display: 'inline-block'}} />
+          <div className="skill-item">
+            <img src="/icons8-react-40.png" alt="React Logo" className="skill-logo" />
             <span>React</span>
           </div>
-          <div className="skill-item" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <img src="/pythonlogo.png" alt="Python Logo" className="skill-logo" style={{width: '22px', height: '22px', marginRight: '2px', verticalAlign: 'middle', display: 'inline-block'}} />
+          <div className="skill-item">
+            <img src="/pythonlogo.png" alt="Python Logo" className="skill-logo" />
             <span>Python</span>
           </div>
-          <div className="skill-item" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <img src="/icons8-full-stack-64.png" alt="Full-Stack Development Logo" className="skill-logo" style={{width: '22px', height: '22px', marginRight: '2px', verticalAlign: 'middle', display: 'inline-block'}} />
+          <div className="skill-item">
+            <img src="/icons8-full-stack-64.png" alt="Full-Stack Development Logo" className="skill-logo" />
             <span>Full-Stack Development</span>
           </div>
         </div>
@@ -71,56 +71,7 @@ function App() {
               href="/myresume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              onMouseEnter={e => {
-                const popup = document.createElement('div');
-                popup.className = 'resume-popup';
-                popup.innerText = 'Download my resume as PDF';
-                popup.style.position = 'absolute';
-                popup.style.top = '120%';
-                popup.style.left = '0';
-                popup.style.background = '#222';
-                popup.style.color = '#64ffda';
-                popup.style.padding = '0.5em 1em';
-                popup.style.borderRadius = '8px';
-                popup.style.boxShadow = '0 2px 8px rgba(100,255,218,0.12)';
-                popup.style.whiteSpace = 'nowrap';
-                popup.style.zIndex = '10';
-                e.currentTarget.parentNode.appendChild(popup);
-                e.currentTarget._popup = popup;
-              }}
-              onMouseLeave={e => {
-                if (e.currentTarget._popup) {
-                  e.currentTarget._popup.remove();
-                  e.currentTarget._popup = null;
-                }
-              }}
-              onTouchStart={e => {
-                if (!e.currentTarget._popup) {
-                  const popup = document.createElement('div');
-                  popup.className = 'resume-popup';
-                  popup.innerText = 'Download my resume as PDF';
-                  popup.style.position = 'absolute';
-                  popup.style.top = '120%';
-                  popup.style.left = '0';
-                  popup.style.background = '#222';
-                  popup.style.color = '#64ffda';
-                  popup.style.padding = '0.5em 1em';
-                  popup.style.borderRadius = '8px';
-                  popup.style.boxShadow = '0 2px 8px rgba(100,255,218,0.12)';
-                  popup.style.whiteSpace = 'nowrap';
-                  popup.style.zIndex = '10';
-                  e.currentTarget.parentNode.appendChild(popup);
-                  e.currentTarget._popup = popup;
-                }
-              }}
-              onTouchEnd={e => {
-                setTimeout(() => {
-                  if (e.currentTarget._popup) {
-                    e.currentTarget._popup.remove();
-                    e.currentTarget._popup = null;
-                  }
-                }, 1200);
-              }}
+              title="Download my resume as PDF"
             >Resume</a>
         </p>
         <div className="social-links">

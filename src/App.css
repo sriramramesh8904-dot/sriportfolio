@@ -423,11 +423,24 @@ h2 {
   position: relative;
   overflow: hidden;
 }
+.skill-logo {
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  vertical-align: middle;
+  display: inline-block;
+}
 
 .skill-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 15px var(--glow-color);
   border-color: var(--accent-color);
+}
+
+.skill-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .skill-item::before {
@@ -517,8 +530,23 @@ h2 {
 }
 
 @media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+
+  .header {
+    padding: 2rem 0;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
   .header h1 {
-    font-size: 2.5rem;
+    font-size: 3rem;
+    letter-spacing: 4px;
+    padding: 0.25em 0.5em;
   }
   
   .headline {
@@ -526,7 +554,8 @@ h2 {
   }
   
   section {
-    padding: 1rem;
+    padding: 1.5rem 1rem;
+    margin: 2rem 0;
   }
 }
 
