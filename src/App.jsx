@@ -5,6 +5,7 @@ import ThemeToggle from './ThemeToggle';
 
 function App() {
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,14 +37,22 @@ function App() {
     }
   };
 
+  const toggleNav = () => setIsNavOpen(!isNavOpen);
+
   return (
     <div className="portfolio">
       <header className="header">
-        <nav className="main-nav">
-          <ul>
+        <button className="mobile-nav-toggle" onClick={toggleNav} aria-label="Toggle navigation">
+          <span className="hamburger-icon"></span>
+        </button>
+        <nav className={`main-nav ${isNavOpen ? 'open' : ''}`}>
+          <ul onClick={() => setIsNavOpen(false)}>
             <li><a href="#about" onClick={handleNavClick}>About Me</a></li>
             <li><a href="#skills" onClick={handleNavClick}>Skills</a></li>
-            <li><a href="#projects" onClick={handleNavClick}>Projects</a></li><li><a href="#internship" onClick={handleNavClick}>Internship</a></li><li><a href="#growth-journey" onClick={handleNavClick}>My Journey</a></li><li><a href="#hobbies" onClick={handleNavClick}>Hobbies</a></li>
+            <li><a href="#projects" onClick={handleNavClick}>Projects</a></li>
+            <li><a href="#internship" onClick={handleNavClick}>Internship</a></li>
+            <li><a href="#growth-journey" onClick={handleNavClick}>My Journey</a></li>
+            <li><a href="#hobbies" onClick={handleNavClick}>Hobbies</a></li>
             <li><a href="#contact" onClick={handleNavClick}>Contact</a></li>
           </ul>
         </nav>
