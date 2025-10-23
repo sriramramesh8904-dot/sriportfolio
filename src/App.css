@@ -704,6 +704,8 @@ h2 {
     justify-content: center;
     transform: translateX(100%);
     transition: transform 0.3s ease-in-out;
+    background-color: var(--bg-dark);
+    z-index: 999;
     padding: 2rem;
   }
 
@@ -759,8 +761,6 @@ h2 {
   .main-nav.open + .mobile-nav-toggle .hamburger-icon { background: transparent; }
   .main-nav.open + .mobile-nav-toggle .hamburger-icon::before { transform: rotate(45deg) translate(5px, 6px); }
   .main-nav.open + .mobile-nav-toggle .hamburger-icon::after { transform: rotate(-45deg) translate(5px, -6px); }
-
-    padding: 1rem;
 
   .back-to-top-btn {
     width: 40px;
