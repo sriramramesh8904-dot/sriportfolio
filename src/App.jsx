@@ -37,7 +37,15 @@ function App() {
     }
   };
 
-  const toggleNav = () => setIsNavOpen(!isNavOpen);
+  const toggleNav = () => {
+    const newNavState = !isNavOpen;
+    setIsNavOpen(newNavState);
+    if (newNavState) {
+      document.body.classList.add('nav-open');
+    } else {
+      document.body.classList.remove('nav-open');
+    }
+  };
 
   return (
     <div className="portfolio">
