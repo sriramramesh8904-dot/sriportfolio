@@ -1,11 +1,115 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import TypeYourWords from './TypeYourWords';
 import ThemeToggle from './ThemeToggle';
 
+const ProjectSlideshow = ({ images }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+  const [slideDirection, setSlideDirection] = useState('next');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const handleImageChange = useCallback((direction) => {
+    setSlideDirection(direction);
+    setIsFading(true);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + (direction === 'next' ? 1 : -1) + images.length) % images.length);
+      setIsFading(false);
+    }, 500);
+  }, [images.length]);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  useEffect(() => {
+    // Only run the timer if not paused and there are multiple images
+    if (!isPaused && images && images.length > 1) {
+      const timer = setInterval(() => {
+        handleImageChange('next');
+      }, 3000);
+      return () => clearInterval(timer);
+    }
+  // Add isPaused to the dependency array
+  }, [images, handleImageChange, isPaused]);
+
+  if (!images || images.length === 0) {
+    return null;
+  }
+
+  return (
+    <div 
+      className="project-slideshow"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <img
+        src={images[currentIndex]}
+        alt={`Project Screenshot ${currentIndex + 1}`}
+        className={`project-image clickable ${isFading ? 'fading' : ''} ${slideDirection}`}
+        onClick={openModal}
+      />
+      <button onClick={() => handleImageChange('prev')} className="slideshow-btn prev-btn" aria-label="Previous image">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button onClick={() => handleImageChange('next')} className="slideshow-btn next-btn" aria-label="Next image">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <img src={images[currentIndex]} alt={`Full size project screenshot ${currentIndex + 1}`} className="modal-image" />
+            <button onClick={closeModal} className="modal-close-btn" aria-label="Close image view">&times;</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ProjectCard = ({ title, description, tech, websiteLink, repoLink, slideshowImages }) => (
+  <div className="project-card">
+    {slideshowImages && <ProjectSlideshow images={slideshowImages} />}
+    <h3>{title}</h3>
+    <p>{description}</p>
+    {websiteLink && (
+      <p>
+        Live Demo : <a href={websiteLink} target="_blank" rel="noopener noreferrer" className="project-link">View Demo</a>
+      </p>
+    )}
+    {repoLink && (
+      <p>
+        GitHub Repo : <a href={repoLink} target="_blank" rel="noopener noreferrer" className="project-repo-link" title="View on GitHub">
+          <svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="project-repo-icon"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+        </a>
+      </p>
+    )}
+    <div className="project-tech">
+      {tech.map(t => <span key={t}>{t}</span>)}
+    </div>
+  </div>
+);
+
 function App() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false); // New state for fading
+  const [slideDirection, setSlideDirection] = useState('next');
+
+  const projectImages = [
+    '/vb 1.png',
+    '/vb 2.png',
+    '/vb 3.png'
+  ];
+
+  const chatbotImages = [
+    '/chatbot 1.png',
+    '/chat 2.png',
+    '/chat 3.png',
+    '/chat 4.png',
+    '/chat 5.png'
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,25 +212,24 @@ function App() {
 
       <section id="projects" className="projects">
         <h2>Featured Project</h2>
-        <div className="project-card">
-          <h3>Vehicle Breakdown Assistance Management System</h3>
-          <p>A web/mobile-based platform that connects drivers with nearby roadside assistance services in real-time. It features GPS-based location tracking, service request management, and an admin dashboard to monitor operations. Designed to ensure quick, efficient, and reliable support during vehicle breakdowns.</p>
-          <p>
-            Website Link : <a
-              href="https://sriram8904.pythonanywhere.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="project-link"
-            >
-              View Project
-            </a>
-          </p>
-          <div className="project-tech">
-            <span>Python | Django</span>
-            
-            <span>HTML | CSS | JavaScript</span>
-          </div>
-        </div>
+        <ProjectCard
+          title="Vehicle Breakdown Assistance Management System"
+          description="A web/mobile-based platform that connects drivers with nearby roadside assistance services in real-time. It features GPS-based location tracking, service request management, and an admin dashboard to monitor operations. Designed to ensure quick, efficient, and reliable support during vehicle breakdowns."
+          tech={['Python | Django', 'HTML | CSS | JavaScript']}
+          websiteLink="https://sriram8904.pythonanywhere.com/"
+          repoLink="https://github.com/sriramramesh8904-dot/VBAMS-Django-Project"
+          slideshowImages={projectImages}
+        />
+        <ProjectCard
+          title="🤖 Elena Chatbot – Your Friendly AI Assistant"
+          description="Chatbot is an intelligent and friendly conversational assistant built using React and Python.
+It offers a human-like chat experience with personalized greetings, natural conversation flow, and a customizable personality.
+The chatbot is affectionately named “Elena”, designed to interact in a warm, approachable, and human-like manner."
+          tech={['React', 'Python', 'AI APIs']}
+          slideshowImages={chatbotImages}
+          repoLink="https://github.com/sriramramesh8904-dot/chatbot"
+          websiteLink="https://chatbot-ptl2mw6lt-srirams-projects-86fd0106.vercel.app/"
+        />
         <div className="project-card">
          <h3>Task Management Platform</h3>
           <p>A full-stack task management solution showcasing my expertise in both front-end and back-end development.</p>
