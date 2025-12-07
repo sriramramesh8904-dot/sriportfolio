@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Git logo sourced from Wikimedia Commons (official Git icon) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 97 97" role="img">
+    <title>Git</title>
+    <path d="M84.9 46.3L50.7 12.1c-2.8-2.8-7.4-2.8-10.2 0L32 20.6l6.8 6.8 8.6-8.6 31.7 31.7c.8 1 .8 2.3 0 3.2L61.2 79.6l-6.8-6.8L54 82.2c2.8 2.8 7.4 2.8 10.2 0l20.7-20.7c3.1-3.1 3.1-8.1 0-11.2z" fill="#F34F29"/>
+    <circle cx="21.2" cy="21.2" r="10.6" fill="#F34F29"/>
+    <circle cx="21.2" cy="76" r="10.6" fill="#F34F29"/>
+    <path d="M34.8 28.1a10.6 10.6 0 1 0 0 15.1 10.6 10.6 0 0 0 0-15.1z" fill="#F34F29"/>
+</svg>

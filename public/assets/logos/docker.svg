@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Docker Moby whale logo (simplified SVG for portfolio use) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img">
+    <title>Docker</title>
+    <path d="M480 256c0-13.3-10.7-24-24-24h-56.9c-6.4 0-12 3.4-15.2 8.9-14.9 29.6-46.4 49.1-81.9 49.1-35.5 0-66.9-19.5-81.9-49.1-3.2-5.5-8.8-8.9-15.2-8.9H56c-13.3 0-24 10.7-24 24v72c0 13.3 10.7 24 24 24h424c13.3 0 24-10.7 24-24v-72z" fill="#0db7ed"/>
+    <path d="M120 240h48v48h-48zM184 160h48v48h-48zM248 200h48v48h-48zM312 152h48v48h-48zM376 200h48v48h-48z" fill="#0db7ed"/>
+</svg>

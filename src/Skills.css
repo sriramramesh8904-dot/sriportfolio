@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.skills-section {
+  padding: 48px 24px;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+/* Theme-aware backgrounds: respond to global [data-theme] */
+[data-theme="light"] .skills-section {
+  background: #ffffff; /* pure white in light mode */
+  color: #222222;
+}
+
+[data-theme="dark"] .skills-section {
+  background: var(--section-bg, rgba(10,25,47,0.7)); /* match site dark section bg */
+  color: var(--text-light, #e6f1ff);
+}
+
+/* Ensure logos remain visually correct in both themes */
+.skills-section .skill-logo {
+  filter: none !important; /* prevent global inversion/filtering */
+  image-rendering: optimizeQuality;
+}
+
+.skills-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.skills-main-heading {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+}
+
+[data-theme="light"] .skills-main-heading {
+  color: #222222;
+}
+
+[data-theme="dark"] .skills-main-heading {
+  color: var(--text-light, #e6f1ff);
+}
+
+.skills-group {
+  margin-bottom: 36px;
+}
+
+.group-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 18px 0;
+}
+
+[data-theme="light"] .group-heading {
+  color: #333333;
+}
+
+[data-theme="dark"] .group-heading {
+  color: var(--text-light, #e6f1ff);
+}
+
+.skills-grid {
+  display: grid;
+  /* A responsive grid that creates as many columns as will fit at 130px wide */
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 18px;
+}
+
+.skill-card {
+  position: relative; /* Needed for the ::after pseudo-element positioning */
+  border-radius: 12px;
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 110px;
+  /* default gentle surface for dark theme; light theme overrides below */
+  background: rgba(255,255,255,0.03);
+  box-shadow: 0 6px 18px rgba(8, 12, 20, 0.45);
+
+  /* Animation initial state */
+  opacity: 0;
+  transform: scale(0.9) translateY(15px);
+  /* Hint to the browser to optimize for these changes */
+  will-change: transform, opacity;
+  /* Removed box-shadow from the transition to optimize performance */
+  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* When the parent container has 'is-visible', trigger the animation */
+.is-visible .skill-card {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Stagger the animation for each card */
+.is-visible .skill-card:nth-child(n) {
+  transition-delay: calc(n * 80ms);
+}
+
+.skill-card:hover {
+  /* The transform is now handled by the main transition for a smoother feel */
+  transform: scale(1.05) translateY(-5px);
+}
+
+/* --- Performant Shadow Animation --- */
+/* Create a pseudo-element to hold the hover shadow */
+.skill-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  /* This is the shadow style we want on hover */
+  box-shadow: 0 12px 28px rgba(8, 12, 20, 0.5);
+  /* Start with the shadow invisible */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1; /* Place it behind the card's content */
+}
+
+.skill-card:hover::after {
+  opacity: 1; /* Fade the shadow in on hover */
+}
+
+[data-theme="light"] .skill-card {
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(18, 24, 32, 0.06);
+}
+
+/* Update the light theme's hover shadow on the pseudo-element */
+[data-theme="light"] .skill-card::after {
+  box-shadow: 0 12px 28px rgba(18, 24, 32, 0.12);
+}
+
+[data-theme="light"] .skill-card:hover::after {
+  opacity: 1;
+}
+
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: transparent;
+}
+
+.skill-logo {
+  max-width: 56px;
+  max-height: 56px;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.skill-label {
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+[data-theme="light"] .skill-label {
+  color: #3a3a3a;
+}
+
+[data-theme="dark"] .skill-label {
+  color: var(--text-light, #e6f1ff);
+}
+
+/* Responsive: two columns on medium screens, one column on small */
+@media (max-width: 900px) {
+  .skills-grid {
+    /* Let auto-fit handle this, but we can ensure at least 2 columns if desired */
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .skills-section {
+    padding: 28px 16px;
+  }
+}

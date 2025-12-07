@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
-import TypeYourWords from './TypeYourWords';
 import ThemeToggle from './ThemeToggle';
+import Skills from './Skills';
 
 const ProjectSlideshow = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -67,35 +67,89 @@ const ProjectSlideshow = ({ images }) => {
   );
 };
 
-const ProjectCard = ({ title, description, tech, websiteLink, repoLink, slideshowImages }) => (
-  <div className="project-card">
-    {slideshowImages && <ProjectSlideshow images={slideshowImages} />}
-    <h3>{title}</h3>
-    <p>{description}</p>
-    {websiteLink && (
-      <p>
-        Live Demo : <a href={websiteLink} target="_blank" rel="noopener noreferrer" className="project-link">View Demo</a>
-      </p>
-    )}
-    {repoLink && (
-      <p>
-        GitHub Repo : <a href={repoLink} target="_blank" rel="noopener noreferrer" className="project-repo-link" title="View on GitHub">
-          <svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="project-repo-icon"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-        </a>
-      </p>
-    )}
-    <div className="project-tech">
-      {tech.map(t => <span key={t}>{t}</span>)}
+const ProjectCard = ({ title, description, tech, websiteLink, repoLink, slideshowImages }) => {
+  return (
+    <div className="project-card">
+      {slideshowImages && <ProjectSlideshow images={slideshowImages} />}
+      <h3>{title}</h3>
+      <p>{description}</p>
+
+      {/* Show explicit links when present (keeps previous UI) */}
+      {websiteLink && (
+        <p>
+          Live Demo : <a href={websiteLink} target="_blank" rel="noopener noreferrer" className="project-link">View Demo</a>
+        </p>
+      )}
+
+      {repoLink && (
+        <p className="project-repo-container">
+          <a
+            href={repoLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="project-repo-link"
+            aria-label={`Open ${title} GitHub repository`}
+            title="View on GitHub"
+          >
+            GitHub Repo
+            <svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="project-repo-icon"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+          </a>
+        </p>
+      )}
+
+      <div className="project-tech">
+        {tech.map(t => <span key={t}>{t}</span>)}
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
+const AnimateOnScroll = ({ children, className = '' }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // If the element is intersecting and we haven't already made it visible
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          // Stop observing the element once it's visible
+          observer.unobserve(ref.current);
+        }
+      },
+      {
+        // Animate when 15% of the element is in view
+        threshold: 0.15,
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  return <div ref={ref} className={`${className} scroll-animation ${isVisible ? 'is-visible' : ''}`}>{children}</div>;
+};
 
 function App() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const [isFading, setIsFading] = useState(false); // New state for fading
   const [slideDirection, setSlideDirection] = useState('next');
+  const [isContactFormVisible, setIsContactFormVisible] = useState(false);
+  const [formStatus, setFormStatus] = useState({ submitting: false, success: false, error: false });
+
+  // --- Project Data and Filtering Logic ---
 
   const projectImages = [
     '/vb 1.png',
@@ -111,15 +165,47 @@ function App() {
     '/chat 5.png'
   ];
 
+  const ALL_PROJECTS = [
+    { id: 'vbams', title: "Vehicle Breakdown Assistance Management System", description: "A web/mobile-based platform that connects drivers with nearby roadside assistance services in real-time. It features GPS-based location tracking, service request management, and an admin dashboard to monitor operations. Designed to ensure quick, efficient, and reliable support during vehicle breakdowns.", tech: ['Python', 'Django', 'HTML', 'CSS', 'JavaScript'], websiteLink: "https://sriram8904.pythonanywhere.com/", repoLink: "https://github.com/sriramramesh8904-dot/VBAMS-Django-Project", slideshowImages: projectImages },
+    { id: 'chatbot', title: "🤖 Elena Chatbot – Your Friendly AI Assistant", description: "Chatbot is an intelligent and friendly conversational assistant built using React and Python. It offers a human-like chat experience with personalized greetings, natural conversation flow, and a customizable personality. The chatbot is affectionately named “Elena”, designed to interact in a warm, approachable, and human-like manner.", tech: ['React', 'Python', 'Flask', 'AI APIs'], slideshowImages: chatbotImages, repoLink: "https://github.com/sriramramesh8904-dot/chatbot", websiteLink: "https://chatbot-ptl2mw6lt-srirams-projects-86fd0106.vercel.app/" },
+    { id: 'task-manager', title: "Task Management Platform", description: "A full-stack task management solution showcasing my expertise in both front-end and back-end development. Built with a React frontend and a robust Python backend.", tech: ['React', 'Python', 'Full-Stack'] }
+  ];
+
+  // State to manage the current filter
+  const [selectedTech, setSelectedTech] = useState('All');
+
+  // Get a unique list of all technologies from the projects
+  const allTech = ['All', ...new Set(ALL_PROJECTS.flatMap(p => p.tech))];
+
+  // Filter projects based on the selected technology
+  const filteredProjects = selectedTech === 'All'
+    ? ALL_PROJECTS
+    : ALL_PROJECTS.filter(p => p.tech.includes(selectedTech));
+
+  // --- End of Project Logic ---
+
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
+      const currentScrollY = window.scrollY;
+
+      // Back-to-top button visibility
+      if (currentScrollY > 300) {
         setShowBackToTop(true);
       } else {
         setShowBackToTop(false);
       }
-    };
 
+      // Navbar hide/show logic
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        // Scrolling down
+        setIsNavVisible(false);
+      } else {
+        // Scrolling up
+        setIsNavVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -151,13 +237,46 @@ function App() {
     }
   };
 
+  const toggleContactForm = () => {
+    setIsContactFormVisible(prevState => !prevState);
+  };
+
+  const handleContactSubmit = async (event) => {
+    event.preventDefault();
+    setFormStatus({ submitting: true, success: false, error: false });
+    const form = event.target;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: form.method,
+        body: data,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setFormStatus({ submitting: false, success: true, error: false });
+        form.reset();
+        // Optionally hide form again after a delay
+        setTimeout(() => setIsContactFormVisible(false), 4000);
+      } else {
+        setFormStatus({ submitting: false, success: false, error: true });
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      setFormStatus({ submitting: false, success: false, error: true });
+    }
+  };
+
   return (
     <div className="portfolio">
       <header className="header">
         <button className="mobile-nav-toggle" onClick={toggleNav} aria-label="Toggle navigation">
           <span className="hamburger-icon"></span>
         </button>
-        <nav className={`main-nav ${isNavOpen ? 'open' : ''}`}>
+        <nav className={`main-nav ${isNavOpen ? 'open' : ''} ${!isNavVisible ? 'hidden' : ''}`}>
           <ul onClick={() => setIsNavOpen(false)}>
             <li><a href="#about" onClick={handleNavClick}>About Me</a></li>
             <li><a href="#skills" onClick={handleNavClick}>Skills</a></li>
@@ -179,105 +298,115 @@ function App() {
             <p className="headline">React | Python | Solutions Engineer</p>
           </div>
         </div>
-        <TypeYourWords />
       </header>
 
-      <section id="about" className="about">
-        <h2>About Me</h2>
-        <p>Building seamless user experiences with modern JavaScript and React. I'm a full-stack developer with expertise in React and Python, passionate about creating efficient and user-friendly applications. I enjoy translating complex problems into clean, scalable code, and I thrive in environments where collaboration and continuous learning are valued.</p>
-        <p>I'm currently an engineering student, continuously expanding my knowledge in both academic and real-world software development.</p>
-      </section>
+      <AnimateOnScroll>
+        <section id="about" className="about">
+          <h2>About Me</h2>
+          <p>Building seamless user experiences with modern JavaScript and React. I'm a full-stack developer with expertise in React and Python, passionate about creating efficient and user-friendly applications. I enjoy translating complex problems into clean, scalable code, and I thrive in environments where collaboration and continuous learning are valued.</p>
+          <p>I'm currently an engineering student, continuously expanding my knowledge in both academic and real-world software development.</p>
+        </section>
+      </AnimateOnScroll>
 
-      <section id="skills" className="skills">
-        <h2>Skills</h2>
-        <div className="skills-grid">
-          <div className="skill-item">
-            <img src="/icons8-java-64.png" alt="JavaScript Logo" className="skill-logo" />
-            <span>JavaScript</span>
-          </div>
-          <div className="skill-item">
-            <img src="/icons8-react-40.png" alt="React Logo" className="skill-logo" />
-            <span>React</span>
-          </div>
-          <div className="skill-item">
-            <img src="/pythonlogo.png" alt="Python Logo" className="skill-logo" />
-            <span>Python</span>
-          </div>
-          <div className="skill-item">
-            <img src="/icons8-full-stack-64.png" alt="Full-Stack Development Logo" className="skill-logo" />
-            <span>Full-Stack Development</span>
-          </div>
-        </div>
-      </section>
+      <AnimateOnScroll>
+        <section id="skills" className="skills">
+          <h2>Skills</h2>
+          <Skills />
+        </section>
+      </AnimateOnScroll>
 
-      <section id="projects" className="projects">
-        <h2>Featured Project</h2>
-        <ProjectCard
-          title="Vehicle Breakdown Assistance Management System"
-          description="A web/mobile-based platform that connects drivers with nearby roadside assistance services in real-time. It features GPS-based location tracking, service request management, and an admin dashboard to monitor operations. Designed to ensure quick, efficient, and reliable support during vehicle breakdowns."
-          tech={['Python | Django', 'HTML | CSS | JavaScript']}
-          websiteLink="https://sriram8904.pythonanywhere.com/"
-          repoLink="https://github.com/sriramramesh8904-dot/VBAMS-Django-Project"
-          slideshowImages={projectImages}
-        />
-        <ProjectCard
-          title="🤖 Elena Chatbot – Your Friendly AI Assistant"
-          description="Chatbot is an intelligent and friendly conversational assistant built using React and Python.
-It offers a human-like chat experience with personalized greetings, natural conversation flow, and a customizable personality.
-The chatbot is affectionately named “Elena”, designed to interact in a warm, approachable, and human-like manner."
-          tech={['React', 'Python', 'AI APIs']}
-          slideshowImages={chatbotImages}
-          repoLink="https://github.com/sriramramesh8904-dot/chatbot"
-          websiteLink="https://chatbot-ptl2mw6lt-srirams-projects-86fd0106.vercel.app/"
-        />
-        <div className="project-card">
-         <h3>Task Management Platform</h3>
-          <p>A full-stack task management solution showcasing my expertise in both front-end and back-end development.</p>
-          <div className="project-tech">
-            <span>React</span>
-            <span>Python</span>
-            <span>Full-Stack</span>
+      <AnimateOnScroll>
+        <section id="projects" className="projects">
+          <h2>Featured Project</h2>
+          <p className="performance-note">🕒 Project Startup Notice: Please allow 1-2 minutes for the Full-Stack Projects to fully wake and load on the first visit.</p>
+          
+          {/* Filter Buttons */}
+          <div className="project-filters">
+            {allTech.map(tech => (
+              <button 
+                key={tech} 
+                onClick={() => setSelectedTech(tech)}
+                className={`filter-btn ${selectedTech === tech ? 'active' : ''}`}
+              >
+                {tech}
+              </button>
+            ))}
           </div>
-        </div>
-      </section>
 
-      <section id="internship" className="internship">
-        <h2>Internship</h2>
-        <div className="internship-item">
-          <h3>Pemchip Infotech R&D Unit – Python & Web Development Intern (Remote)</h3>
-          <p>Completed a 2-month remote internship focused on Python and web development. During this period, I gained hands-on experience in building dynamic web applications, working with backend logic using Python, and integrating frontend technologies. I also collaborated on real-world projects, enhancing my understanding of full-stack development workflows and best practices in a professional environment.</p>
-        </div>
-      </section>
+          {/* Render Filtered Projects */}
+          {filteredProjects.map(project => <ProjectCard key={project.id} {...project} />)}
+        </section>
+      </AnimateOnScroll>
 
-      <section id="growth-journey" className="growth-journey">
-        <h2>My Growth Journey</h2>
-        <p>There was a time in my life when I was completely distracted and heading in the wrong direction. I lost focus, and it led to more criticism, setbacks, and self-doubt. People questioned my worth and honestly, so did I. In those difficult moments, I stopped and asked myself a simple but powerful question: "Who am I, and who do I want to become?"</p>
-        <p>That was the turning point. I chose to shift my focus back to what truly mattered learning, growing, and rebuilding myself. I poured my energy into my studies, worked on improving my skills, and challenged myself to prove my capabilities through consistent effort and small wins. The journey wasn't easy, but it was real.</p>
-        <p>Today, I don’t claim to be the best — but I’m proud to say I’m better than I was yesterday. And maybe, better than many who never dared to restart. My story is a reminder that it’s never too late to change direction. Growth starts the moment you decide to stop running from who you are and start building who you want to be.</p>
-        <p className="author-signature">- Sriram</p>
-      </section>
+      <AnimateOnScroll>
+        <section id="internship" className="internship">
+          <h2>Internship</h2>
+          <div className="internship-item">
+            <h3>Pemchip Infotech R&D Unit – Python & Web Development Intern (Remote)</h3>
+            <p>Completed a 2-month remote internship focused on Python and web development. During this period, I gained hands-on experience in building dynamic web applications, working with backend logic using Python, and integrating frontend technologies. I also collaborated on real-world projects, enhancing my understanding of full-stack development workflows and best practices in a professional environment.</p>
+          </div>
+        </section>
+      </AnimateOnScroll>
 
-      <section id="hobbies" className="hobbies">
-        <h2>Hobbies & Interests</h2>
-        <ul className="hobbies-list">
-          <li>Passionate about bike riding and exploring new places through travel and trekking.</li>
-          <li>Enjoy watching web series and exploring different storytelling styles.</li>
-          <li>Love playing cricket and staying active through outdoor sports.</li>
-          <li>Enthusiastic gamer with a strong interest in strategy and team-based games.</li>
-        </ul>
-      </section>
+      <AnimateOnScroll>
+        <section id="growth-journey" className="growth-journey">
+          <h2>My Growth Journey</h2>
+          <p>There was a time in my life when I was completely distracted and heading in the wrong direction. I lost focus, and it led to more criticism, setbacks, and self-doubt. People questioned my worth and honestly, so did I. In those difficult moments, I stopped and asked myself a simple but powerful question: "Who am I, and who do I want to become?"</p>
+          <p>That was the turning point. I chose to shift my focus back to what truly mattered learning, growing, and rebuilding myself. I poured my energy into my studies, worked on improving my skills, and challenged myself to prove my capabilities through consistent effort and small wins. The journey wasn't easy, but it was real.</p>
+          <p>Today, I don’t claim to be the best — but I’m proud to say I’m better than I was yesterday. And maybe, better than many who never dared to restart. My story is a reminder that it’s never too late to change direction. Growth starts the moment you decide to stop running from who you are and start building who you want to be.</p>
+          <p className="author-signature">- Sriram</p>
+        </section>
+      </AnimateOnScroll>
+
+      <AnimateOnScroll>
+        <section id="hobbies" className="hobbies">
+          <h2>Hobbies & Interests</h2>
+          <ul className="hobbies-list">
+            <li>Passionate about bike riding and exploring new places through travel and trekking.</li>
+            <li>Enjoy watching web series and exploring different storytelling styles.</li>
+            <li>Love playing cricket and staying active through outdoor sports.</li>
+            <li>Enthusiastic gamer with a strong interest in strategy and team-based games.</li>
+          </ul>
+        </section>
+      </AnimateOnScroll>
 
       <footer id="contact" className="contact">
         <h2>Get In Touch</h2>
-        <p>
-          If you'd like to reach out, call or message me at 
-          <a href="tel:+918428203688">+91 84282 03688</a> or email me at 
-          <a href="mailto:sriramramesh8904@gmail.com">sriramramesh8904@gmail.com</a>.
-        </p>
+        <p>Have a question, a project proposal, or just want to say hello? Go ahead.</p>
+
+        {!isContactFormVisible ? (
+          <button onClick={toggleContactForm} className="contact-toggle-btn">
+            Drop me a line
+          </button>
+        ) : (
+          <form
+            action="https://api.staticforms.xyz/submit"
+            method="POST"
+            className="contact-form"
+            onSubmit={handleContactSubmit}
+          >
+            {formStatus.success && <p className="form-success-message">Thanks for your message! I'll get back to you soon.</p>}
+            {formStatus.error && <p className="form-error-message">Oops! Something went wrong. Please try again.</p>}
+            <input type="hidden" name="accessKey" value="sf_n371bgm9k4iebgf886002b60" />
+            {!formStatus.success && (
+              <>
+                <div className="form-group">
+                  <input type="text" name="name" placeholder="Your Name" required className="form-input" disabled={formStatus.submitting} />
+                  <input type="email" name="email" placeholder="Your Email" required className="form-input" disabled={formStatus.submitting} />
+                </div>
+                <textarea name="message" placeholder="Your Message" required className="form-textarea" disabled={formStatus.submitting}></textarea>
+                <button type="submit" className="submit-btn" disabled={formStatus.submitting}>
+                  {formStatus.submitting ? 'Sending...' : 'Send Message'}
+                </button>
+              </>
+            )}
+          </form>
+        )}
+
         <p>
           <a
             className="resume-link"
-            href="/myresume.pdf"
+            href="/sriram.resume.pdf"
             target="_blank"
             rel="noopener noreferrer"
             title="Download my resume as PDF"
@@ -305,7 +434,7 @@ The chatbot is affectionately named “Elena”, designed to interact in a warm,
           </a>
         </div>
         <p className="footer-quote">"Growth begins the moment you stop asking 'Why me?' and start saying 'Watch me.'"</p>
-        <p className="footer-credit">© Created by Sriram</p>
+        <p className="footer-credit">© Created by Sriram. All rights reserved.</p>
       </footer>
       {showBackToTop && (
         <button onClick={scrollToTop} className="back-to-top-btn" title="Go to top">
